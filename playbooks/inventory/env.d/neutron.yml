@@ -50,7 +50,9 @@ component_skel:
   opendaylight:
     belongs_to:
       - neutron_all
-
+  neutron_vpp_agent:
+    belongs_to:
+      - neutron_all
 
 container_skel:
   neutron_agents_container:
