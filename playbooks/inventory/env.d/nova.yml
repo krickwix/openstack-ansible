@@ -61,6 +61,7 @@ container_skel:
       - neutron_openvswitch_agent
       - neutron_sriov_nic_agent
       - nova_compute
+      - neutron_vpp_agent
     properties:
       is_metal: true
 
