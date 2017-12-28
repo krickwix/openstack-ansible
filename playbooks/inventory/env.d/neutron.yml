@@ -50,7 +50,9 @@ component_skel:
   opendaylight:
     belongs_to:
       - neutron_all
-
+  neutron_vpp_agent:
+    belongs_to:
+      - neutron_all
 
 container_skel:
   neutron_agents_container:
@@ -66,6 +68,7 @@ container_skel:
       - neutron_dhcp_agent
       - neutron_lbaas_agent
       - neutron_bgp_dragent
+      - neutron_vpp_agent
   neutron_server_container:
     belongs_to:
       - network_containers
