@@ -22,7 +22,6 @@ container_skel:
   etcd_container:
     belongs_to:
       - etcd_containers
-      - shared-infra_containers
     contains:
       - etcd
 
