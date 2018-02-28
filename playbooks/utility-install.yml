@@ -18,7 +18,7 @@
   max_fail_percentage: 20
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
 
     - include: common-tasks/os-log-dir-setup.yml
       vars:
@@ -86,8 +86,6 @@
         owner: root
         group: root
       when: utility_ssh_private_key is defined
-  vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
   environment: "{{ deployment_environment_variables | default({}) }}"
   tags:
     - utility

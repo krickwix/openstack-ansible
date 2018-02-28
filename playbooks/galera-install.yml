@@ -25,7 +25,7 @@
         log_dirs:
           - src: "/openstack/log/{{ inventory_hostname }}-mysql_logs"
             dest: "/var/log/mysql_logs"
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
       vars:
         list_of_bind_mounts: "{{ galera_container_bind_mounts }}"
         extra_container_config_no_restart:
@@ -35,8 +35,6 @@
       when:
         - hostvars['localhost']['resolvconf_enabled'] | bool
     - include: common-tasks/package-cache-proxy.yml
-  vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
   environment: "{{ deployment_environment_variables | default({}) }}"
   tags:
     - galera
@@ -70,8 +68,6 @@
       tags:
         - crontab
   vars:
-    # overridden here to ensure the correct value for the galera_client role
-    galera_address: 127.0.0.1
     galera_server_id: "{{ inventory_hostname | string_2_int }}"
     galera_wsrep_node_name: "{{ container_name }}"
   environment: "{{ deployment_environment_variables | default({}) }}"

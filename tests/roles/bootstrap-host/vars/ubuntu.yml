@@ -17,6 +17,7 @@ packages_install:
   - bridge-utils
   - build-essential
   - curl
+  - dbus
   - ethtool
   - git-core
   - ipython

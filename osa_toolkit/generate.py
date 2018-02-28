@@ -217,7 +217,6 @@ def _build_container_hosts(container_affinity, container_hosts, type_and_name,
             du.append_if(array=container_mapping, item=host_type_containers)
 
             hostvars_options.update({
-                'properties': properties,
                 'ansible_host': address,
                 'container_address': address,
                 'container_name': container_host_name,
@@ -225,6 +224,8 @@ def _build_container_hosts(container_affinity, container_hosts, type_and_name,
                 'physical_host_group': physical_host_type,
                 'component': assignment
             })
+            if 'properties' not in hostvars_options:
+                hostvars_options['properties'] = properties
 
 
 def _append_container_types(inventory, host_type):
@@ -615,16 +616,18 @@ def _add_additional_networks(key, inventory, ip_q, q_name, netmask, interface,
         if properties:
             is_metal = properties.get('is_metal', False)
 
+        _network = network_entry(
+            is_metal,
+            interface,
+            bridge,
+            net_type,
+            net_mtu
+        )
         # This should convert found addresses based on q_name + "_address"
         #  and then build the network if its not found.
-        if not is_metal and old_address not in networks:
-            network = networks[old_address] = network_entry(
-                is_metal,
-                interface,
-                bridge,
-                net_type,
-                net_mtu
-            )
+        if not is_metal and (old_address not in networks or
+                             networks[old_address] != _network):
+            network = networks[old_address] = _network
             if old_address in container and container[old_address]:
                 network['address'] = container.pop(old_address)
             elif not is_metal:
@@ -634,20 +637,17 @@ def _add_additional_networks(key, inventory, ip_q, q_name, netmask, interface,
 
             network['netmask'] = netmask
         elif is_metal:
-            network = networks[old_address] = network_entry(
-                is_metal,
-                interface,
-                bridge,
-                net_type,
-                net_mtu
-            )
+            network = networks[old_address] = _network
             network['netmask'] = netmask
             if is_ssh_address or is_container_address:
                 # Container physical host group
                 cphg = container.get('physical_host_group')
 
                 # user_config data from the container physical host group
-                phg = user_config[cphg][container_host]
+                if user_config[cphg].get(container_host) is not None:
+                    phg = user_config[cphg][container_host]
+                else:
+                    phg = user_config[cphg][physical_host]
                 network['address'] = phg['ip']
 
         if is_ssh_address is True:
@@ -814,7 +814,7 @@ def _ensure_inventory_uptodate(inventory, container_skel):
         if hosts:
             for host in hosts:
                 container = host_vars[host]
-                if 'properties' in type_vars:
+                if 'properties' in type_vars and 'properties' not in container:
                     logger.debug("Copied propeties for %s from skeleton",
                                  container)
                     container['properties'] = type_vars['properties']

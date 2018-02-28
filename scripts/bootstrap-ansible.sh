@@ -22,7 +22,7 @@ set -e -u -x
 ## Vars ----------------------------------------------------------------------
 export HTTP_PROXY=${HTTP_PROXY:-""}
 export HTTPS_PROXY=${HTTPS_PROXY:-""}
-export ANSIBLE_PACKAGE=${ANSIBLE_PACKAGE:-"ansible==2.3.2.0"}
+export ANSIBLE_PACKAGE=${ANSIBLE_PACKAGE:-"ansible==2.4.3.0"}
 export ANSIBLE_ROLE_FILE=${ANSIBLE_ROLE_FILE:-"ansible-role-requirements.yml"}
 export SSH_DIR=${SSH_DIR:-"/root/.ssh"}
 export DEBIAN_FRONTEND=${DEBIAN_FRONTEND:-"noninteractive"}
@@ -47,7 +47,7 @@ export OSA_CLONE_DIR="$(pwd)"
 
 # Set the variable to the role file to be the absolute path
 ANSIBLE_ROLE_FILE="$(readlink -f "${ANSIBLE_ROLE_FILE}")"
-OSA_INVENTORY_PATH="$(readlink -f playbooks/inventory)"
+OSA_INVENTORY_PATH="$(readlink -f inventory)"
 OSA_PLAYBOOK_PATH="$(readlink -f playbooks)"
 
 # Create the ssh dir if needed
@@ -174,6 +174,11 @@ ${PIP_COMMAND} install ${PIP_OPTS} -r requirements.txt ${ANSIBLE_PACKAGE} \
 # Install our osa_toolkit code from the current checkout
 $PIP_COMMAND install -e .
 
+# Add SELinux support to the venv
+if [ -d "/usr/lib64/python2.7/site-packages/selinux/" ]; then
+  rsync -avX /usr/lib64/python2.7/site-packages/selinux/ /opt/ansible-runtime/lib64/python2.7/selinux/
+fi
+
 # Ensure that Ansible binaries run from the venv
 pushd /opt/ansible-runtime/bin
   for ansible_bin in $(ls -1 ansible*); do
@@ -194,8 +199,6 @@ popd
 # Write the OSA Ansible rc file
 sed "s|OSA_INVENTORY_PATH|${OSA_INVENTORY_PATH}|g" scripts/openstack-ansible.rc > /usr/local/bin/openstack-ansible.rc
 sed -i "s|OSA_PLAYBOOK_PATH|${OSA_PLAYBOOK_PATH}|g" /usr/local/bin/openstack-ansible.rc
-sed -i "s|OSA_GROUP_VARS_DIR|${OSA_CLONE_DIR}/group_vars/|g" /usr/local/bin/openstack-ansible.rc
-sed -i "s|OSA_HOST_VARS_DIR|${OSA_CLONE_DIR}/host_vars/|g" /usr/local/bin/openstack-ansible.rc
 
 
 # Create openstack ansible wrapper tool
@@ -238,6 +241,13 @@ if [[ "\${PWD}" == *"${OSA_CLONE_DIR}"* ]] || [ "\${RUN_CMD}" == "openstack-ansi
   # Source the Ansible configuration.
   . /usr/local/bin/openstack-ansible.rc
 
+  # Load userspace group vars
+  if [[ -d /etc/openstack_deploy/group_vars || -d /etc/openstack_deploy/host_vars ]]; then
+     if [[ ! -f /etc/openstack_deploy/inventory.ini ]]; then
+        echo '[all]' > /etc/openstack_deploy/inventory.ini
+     fi
+  fi
+
   # Check whether there are any user configuration files
   if ls -1 /etc/openstack_deploy/user_*.yml &> /dev/null; then
 
@@ -261,6 +271,14 @@ fi
 # Execute the Ansible command.
 if [ "\${RUN_CMD}" == "openstack-ansible" ] || [ "\${RUN_CMD}" == "ansible-playbook" ]; then
   ansible-playbook "\${@}" \${VAR1}
+  PLAYBOOK_RC="\$?"
+  if [[ "\${PLAYBOOK_RC}" -ne "0" ]]; then
+    echo -e "\nEXIT NOTICE [Playbook execution failure] **************************************"
+  else
+    echo -e "\nEXIT NOTICE [Playbook execution success] **************************************"
+  fi
+  echo "==============================================================================="
+  exit "\${PLAYBOOK_RC}"
 else
   \${RUN_CMD} "\${@}"
 fi
@@ -281,12 +299,37 @@ if [ -f "${ANSIBLE_ROLE_FILE}" ]; then
     ansible-galaxy install --role-file="${ANSIBLE_ROLE_FILE}" \
                            --force
   elif [[ "${ANSIBLE_ROLE_FETCH_MODE}" == 'git-clone' ]];then
+    # NOTE(cloudnull): When bootstrapping we don't want ansible to interact
+    #                  with our plugins by default. This change will force
+    #                  ansible to ignore our plugins during this process.
+    export ANSIBLE_LIBRARY="/dev/null"
+    export ANSIBLE_LOOKUP_PLUGINS="/dev/null"
+    export ANSIBLE_FILTER_PLUGINS="/dev/null"
+    export ANSIBLE_ACTION_PLUGINS="/dev/null"
+    export ANSIBLE_CALLBACK_PLUGINS="/dev/null"
+    export ANSIBLE_CALLBACK_WHITELIST="/dev/null"
+    export ANSIBLE_TEST_PLUGINS="/dev/null"
+    export ANSIBLE_VARS_PLUGINS="/dev/null"
+    export ANSIBLE_STRATEGY_PLUGINS="/dev/null"
+    export ANSIBLE_CONFIG="none-ansible.cfg"
+
     pushd tests
       /opt/ansible-runtime/bin/ansible-playbook get-ansible-role-requirements.yml \
                        -i ${OSA_CLONE_DIR}/tests/test-inventory.ini \
                        -e role_file="${ANSIBLE_ROLE_FILE}" \
                        -vvv
     popd
+
+    unset ANSIBLE_LIBRARY
+    unset ANSIBLE_LOOKUP_PLUGINS
+    unset ANSIBLE_FILTER_PLUGINS
+    unset ANSIBLE_ACTION_PLUGINS
+    unset ANSIBLE_CALLBACK_PLUGINS
+    unset ANSIBLE_CALLBACK_WHITELIST
+    unset ANSIBLE_TEST_PLUGINS
+    unset ANSIBLE_VARS_PLUGINS
+    unset ANSIBLE_STRATEGY_PLUGINS
+    unset ANSIBLE_CONFIG
   else
     echo "Please set the ANSIBLE_ROLE_FETCH_MODE to either of the following options ['galaxy', 'git-clone']"
     exit 99

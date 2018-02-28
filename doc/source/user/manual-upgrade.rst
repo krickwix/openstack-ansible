@@ -38,6 +38,22 @@ From the ``openstack-ansible`` root directory, run the following commands:
     # export SCRIPTS_PATH="${MAIN_PATH}/scripts"
     # export UPGRADE_PLAYBOOKS="${SCRIPTS_PATH}/upgrade-utilities/playbooks"
 
+Deal with existing OpenStack-Ansible artifacts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The deployment node may have previous branch artifacts.
+
+Unset the following environment variables first:
+
+.. code-block:: console
+
+    # unset ANSIBLE_INVENTORY
+
+Optionally, take a backup of your environment:
+
+.. code-block:: console
+
+    # tar zcf /openstack/previous-ansible_`date +%F_%H%M`.tar.gz /etc/openstack_deploy /etc/ansible/ /usr/local/bin/openstack-ansible.rc
 
 Bootstrap Ansible again
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,7 +149,7 @@ Before installing the infrastructure and OpenStack, update the host machines.
 
 .. code-block:: console
 
-    # openstack-ansible setup-hosts.yml --limit '!galera_all'
+    # openstack-ansible setup-hosts.yml --limit '!galera_all:!neutron_agent:!rabbitmq_all'
 
 This command is the same setting up hosts on a new installation. The
 ``galera_all`` host group is excluded to prevent reconfiguration and
@@ -147,7 +163,7 @@ Update the Galera container configuration independently.
 .. code-block:: console
 
     # openstack-ansible lxc-containers-create.yml -e \
-    'lxc_container_allow_restarts=false' --limit galera_all
+    'lxc_container_allow_restarts=false' --limit 'galera_all:neutron_agent:rabbitmq_all'
 
 This command is a subset of the host setup playbook, limited to the
 ``galera_all`` host group. The configuration of those containers is
@@ -167,15 +183,6 @@ fashion.
 
     # openstack-ansible "${UPGRADE_PLAYBOOKS}/galera-cluster-rolling-restart.yml"
 
-Update HAProxy configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Install and update any new or changed HAProxy service configurations.
-
-.. code-block:: console
-
-    # openstack-ansible haproxy-install.yml
-
 Update repository servers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -185,6 +192,24 @@ required by the |current_release_formal_name| release.
 .. code-block:: console
 
     # openstack-ansible repo-install.yml
+
+Update HAProxy configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Install and update any new or changed HAProxy service configurations.
+
+.. code-block:: console
+
+    # openstack-ansible haproxy-install.yml
+
+Use the repository servers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now all containers can be pointed to the repo server's VIPs.
+
+.. code-block:: console
+
+    # openstack-ansible repo-use.yml
 
 Upgrade the MariaDB version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

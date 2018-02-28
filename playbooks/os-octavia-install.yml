@@ -19,7 +19,7 @@
   max_fail_percentage: 20
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
       static: no
     - include: common-tasks/rabbitmq-vhost-user.yml
       static: no
@@ -64,7 +64,6 @@
       tags:
         - crontab
   vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
     octavia_galera_user: octavia
     octavia_galera_database: octavia
     octavia_galera_address: "{{ galera_address }}"

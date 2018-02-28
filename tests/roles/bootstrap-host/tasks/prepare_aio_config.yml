@@ -119,16 +119,6 @@
     repo_build_pip_extra_indexes: "{{ fastest_wheel_mirror.stdout_lines }}"
   when: not pip_conf_file.stat.exists
 
-- name: Check whether the host has a git cache
-  stat:
-    path: /opt/git/openstack
-  register: _local_git_cache
-
-- name: Set repo_build_git_cache fact
-  set_fact:
-    repo_build_git_cache: /opt/git/openstack
-  when: _local_git_cache.stat.exists
-
 - name: Set the user_variables
   config_template:
     src: "{{ bootstrap_user_variables_template }}"
@@ -150,6 +140,13 @@
     dest: "/etc/openstack_deploy/env.d/cinder-volume.yml"
   when:
     - "bootstrap_host_scenario == 'ceph'"
+
+- name: Copy modified env.d file for metal scenario
+  copy:
+    src: "{{ playbook_dir }}/../etc/openstack_deploy/env.d/aio_metal.yml.example"
+    dest: "/etc/openstack_deploy/env.d/aio_metal.yml"
+  when:
+    - "bootstrap_host_scenario == 'aio_metal'"
 
 - name: Add user_conf_files to contain the list of files to copy into containers
   file:

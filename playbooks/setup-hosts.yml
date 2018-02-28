@@ -15,5 +15,4 @@
 
 - include: openstack-hosts-setup.yml
 - include: security-hardening.yml
-- include: lxc-hosts-setup.yml
-- include: lxc-containers-create.yml
+- include: containers-deploy.yml

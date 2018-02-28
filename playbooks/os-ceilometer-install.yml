@@ -19,7 +19,7 @@
   max_fail_percentage: 20
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
     - include: common-tasks/rabbitmq-vhost-user.yml
       static: no
       vars:
@@ -51,8 +51,6 @@
       rsyslog_client_config_name: "99-ceilometer-rsyslog-client.conf"
       tags:
         - rsyslog
-  vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
   environment: "{{ deployment_environment_variables | default({}) }}"
   tags:
     - ceilometer

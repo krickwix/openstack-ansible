@@ -41,7 +41,7 @@ with open(TABLE_FILE, 'a+') as f:
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../playbooks/inventory/'))
+sys.path.insert(0, os.path.abspath('../../inventory/'))
 
 # -- General configuration ------------------------------------------------
 
@@ -323,10 +323,12 @@ if watermark == "":
     deploy_branch_link_name = "latest"
     dev_branch_link_name = ""
     current_release_git_branch_name = "master"
+    current_release_gnocchi_git_branch_name = "master"
 else:
     deploy_branch_link_name = current_release_branch_name
     dev_branch_link_name = "{}/".format(current_release_branch_name)
     current_release_git_branch_name = 'stable/' + current_release_branch_name
+    current_release_gnocchi_git_branch_name = "4.1"
 
 previous_release_capital_name = previous_release_branch_name.upper()
 previous_release_formal_name = previous_release_branch_name.capitalize()
@@ -342,6 +344,7 @@ rst_epilog = """
 .. |previous_release_branch_name| replace:: %s
 .. |current_release_branch_name| replace:: %s
 .. |current_release_git_branch_name| replace:: %s
+.. |current_release_gnocchi_git_branch_name| replace:: %s
 .. |previous_release_capital_name| replace:: %s
 .. |previous_release_formal_name| replace:: %s
 .. |current_release_capital_name| replace:: %s
@@ -351,6 +354,7 @@ rst_epilog = """
 """ % (previous_release_branch_name,
        current_release_branch_name,
        current_release_git_branch_name,
+       current_release_gnocchi_git_branch_name,
        previous_release_capital_name,
        previous_release_formal_name,
        current_release_capital_name,

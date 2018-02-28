@@ -18,7 +18,7 @@
   gather_facts: "{{ osa_gather_facts | default(True) }}"
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
     - include: common-tasks/rabbitmq-vhost-user.yml
       static: no
       vars:
@@ -57,7 +57,6 @@
       tags:
         - crontab
   vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
     ironic_galera_user: ironic
     ironic_galera_database: ironic
     ironic_galera_address: "{{ galera_address }}"
