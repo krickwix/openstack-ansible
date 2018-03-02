@@ -20,7 +20,7 @@
   max_fail_percentage: 0
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
       static:
       vars:
         extra_container_config_no_restart:
@@ -32,8 +32,6 @@
     - include: common-tasks/package-cache-proxy.yml
   roles:
     - role: "system_crontab_coordination"
-  vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
   environment: "{{ deployment_environment_variables | default({}) }}"
   tags:
     - rabbitmq

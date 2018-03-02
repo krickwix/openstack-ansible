@@ -30,25 +30,12 @@
       register: _local_git_cache
       when: repo_build_git_cache is defined
 
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
       static: no
       vars:
         list_of_bind_mounts:
           - mount_path: "/openstack/{{ inventory_hostname }}"
             bind_dir_path: "/var/www"
-      when: repo_build_git_cache is not defined or not _local_git_cache.stat.exists
-
-    - include: common-tasks/os-lxc-container-setup.yml
-      static: no
-      vars:
-        list_of_bind_mounts:
-          - mount_path: "/openstack/{{ inventory_hostname }}"
-            bind_dir_path: "/var/www"
-          - mount_path: "{{ repo_build_git_cache }}"
-            bind_dir_path: "{{ repo_build_git_cache }}"
-      when:
-        - repo_build_git_cache is defined
-        - _local_git_cache.stat.exists
 
     - include: common-tasks/unbound-clients.yml
       static: no
@@ -82,8 +69,6 @@
 
   vars_files:
     - defaults/repo_packages/openstack_services.yml
-  vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
   environment: "{{ deployment_environment_variables | default({}) }}"
   tags:
     - repo-server

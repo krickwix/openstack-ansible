@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 #
 # Copyright 2016, Rackspace US, Inc.
 #
@@ -109,7 +109,7 @@ def main():
     projects = []
 
     # Prepare the regex match
-    regex = re.compile('^.*openstack/openstack-ansible.*$')
+    regex = re.compile('^.*openstack/(ansible-hardening|openstack-ansible.*)$')
 
     # Loop through the list of roles
     for role_data in reqs:

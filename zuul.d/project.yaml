@@ -1,4 +1,3 @@
----
 # Copyright 2017, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,38 +13,37 @@
 # limitations under the License.
 
 - project:
-    name: openstack/openstack-ansible
     check:
       jobs:
         - openstack-ansible-linters
-        - openstack-ansible-varstest-aio-ubuntu-xenial
-        - openstack-ansible-deploy-aio-centos-7
-        - openstack-ansible-deploy-aio-opensuse-423
-        - openstack-ansible-deploy-aio-ubuntu-xenial
+        - openstack-ansible-varstest-aio_lxc-ubuntu-xenial
+        - openstack-ansible-deploy-aio_lxc-centos-7
+        - openstack-ansible-deploy-aio_lxc-opensuse-423
+        - openstack-ansible-deploy-aio_lxc-ubuntu-xenial
         - openstack-ansible-deploy-ceph-centos-7
         - openstack-ansible-deploy-ceph-ubuntu-xenial
         - openstack-ansible-deploy-ceph-opensuse-423
+        - openstack-ansible-deploy-aio_metal-ubuntu-xenial
     experimental:
       jobs:
         - openstack-ansible-deploy-octavia-ubuntu-xenial
+        - openstack-ansible-deploy_with_ansible_devel-aio-ubuntu-xenial
     gate:
       jobs:
         - openstack-ansible-linters
-        - openstack-ansible-varstest-aio-ubuntu-xenial
-        - openstack-ansible-deploy-aio-ubuntu-xenial
-        # Removed temporarily until
-        # https://bugs.launchpad.net/cinder/+bug/1737015 is fixed
-        # - openstack-ansible-deploy-ceph-ubuntu-xenial
+        - openstack-ansible-varstest-aio_lxc-ubuntu-xenial
+        - openstack-ansible-deploy-ceph-ubuntu-xenial
+        - openstack-ansible-deploy-aio_lxc-ubuntu-xenial
     periodic:
       jobs:
-        - openstack-ansible-deploy-aio-centos-7
-        - openstack-ansible-deploy-aio-opensuse-423
-        - openstack-ansible-deploy-aio-ubuntu-xenial
-        - openstack-ansible-deploy-ceph-centos-7
+        # We remove the centos and opensuse periodics
+        # until they are more likely to pass on time.
+        # (Currently timing out).
+        #- openstack-ansible-deploy-aio_lxc-centos-7
+        #- openstack-ansible-deploy-aio_lxc-opensuse-423
+        - openstack-ansible-deploy-aio_lxc-ubuntu-xenial
+        #- openstack-ansible-deploy-ceph-centos-7
         - openstack-ansible-deploy-ceph-ubuntu-xenial
         - openstack-ansible-deploy-translations-ubuntu-xenial
-        - openstack-ansible-upgrade-aio-centos-7
-        - openstack-ansible-upgrade-aio-opensuse-423
-        - openstack-ansible-upgrade-aio-ubuntu-xenial
-        - openstack-ansible-upgrade-ceph-centos-7
+        - openstack-ansible-upgrade-aio_lxc-ubuntu-xenial
         - openstack-ansible-upgrade-ceph-ubuntu-xenial

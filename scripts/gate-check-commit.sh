@@ -44,7 +44,7 @@ export ANSIBLE_ROLE_FETCH_MODE="git-clone"
 export ANSIBLE_LOG_DIR="/openstack/log/ansible-logging"
 
 # Set the scenario to execute based on the first CLI parameter
-export SCENARIO=${1:-"aio"}
+export SCENARIO=${1:-"aio_lxc"}
 
 # Set the action base on the second CLI parameter
 # Actions available: [ 'deploy', 'upgrade' ]
@@ -74,15 +74,10 @@ info_block "Checking for required libraries." 2> /dev/null || source "${OSA_CLON
 
 ## Main ----------------------------------------------------------------------
 
-# Set gate job exit traps, this is run regardless of exit state when the job finishes.
-trap gate_job_exit_tasks EXIT
-
 # Log some data about the instance and the rest of the system
 log_instance_info
 
-if [ "$GATE_EXIT_RUN_DSTAT" == true ]; then
-  run_dstat
-fi
+run_dstat || true
 
 # Get minimum disk size
 DATA_DISK_MIN_SIZE="$((1024**3 * $(awk '/bootstrap_host_data_disk_min_size/{print $2}' "${OSA_CLONE_DIR}/tests/roles/bootstrap-host/defaults/main.yml") ))"

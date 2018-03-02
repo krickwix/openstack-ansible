@@ -19,7 +19,7 @@
   max_fail_percentage: 20
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
     - include: common-tasks/rabbitmq-vhost-user.yml
       static: no
       vars:
@@ -60,7 +60,6 @@
       tags:
         - rsyslog
   vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
     aodh_rabbitmq_userid: aodh
     aodh_rabbitmq_vhost: /aodh
     aodh_rabbitmq_servers: "{{ rabbitmq_servers }}"

@@ -40,7 +40,7 @@ needed in an environment, it is possible to create additional nodes.
 
    .. code:: console
 
-      # /opt/openstack-ansible/playbooks/inventory/dynamic_inventory.py > /dev/null
+      # /opt/openstack-ansible/inventory/dynamic_inventory.py > /dev/null
 
 #. Create the ``/root/add_host.limit`` file, which contains all new node
    host names. Replace ``<NEW INFRA NODE>`` with the name of the new host.
@@ -101,9 +101,9 @@ cluster.
    .. code-block:: shell-session
 
        # cd /opt/openstack-ansible/playbooks
-       # openstack-ansible setup-hosts.yml --limit NEW_HOST_NAME
+       # openstack-ansible setup-hosts.yml --limit localhost,NEW_HOST_NAME
        # ansible nova_all -m setup -a 'filter=ansible_local gather_subset="!all"'
-       # openstack-ansible setup-openstack.yml --skip-tags nova-key-distribute --limit NEW_HOST_NAME
+       # openstack-ansible setup-openstack.yml --skip-tags nova-key-distribute --limit localhost,NEW_HOST_NAME
        # openstack-ansible setup-openstack.yml --tags nova-key --limit compute_hosts
 
 Test new compute nodes

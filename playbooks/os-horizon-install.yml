@@ -19,7 +19,7 @@
   max_fail_percentage: 20
   user: root
   pre_tasks:
-    - include: common-tasks/os-lxc-container-setup.yml
+    - include: "common-tasks/os-{{ container_tech | default('lxc') }}-container-setup.yml"
     - include: common-tasks/os-log-dir-setup.yml
       vars:
         log_dirs:
@@ -50,7 +50,6 @@
       tags:
         - crontab
   vars:
-    is_metal: "{{ properties.is_metal|default(false) }}"
     horizon_galera_user: horizon
     horizon_galera_database: horizon
     horizon_galera_address: "{{ galera_address }}"
