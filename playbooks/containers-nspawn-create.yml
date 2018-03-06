@@ -1,0 +1,58 @@
+---
+# Copyright 2017, Rackspace US, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Gather nspawn container host facts
+  hosts: "{{ nspawn_host_group | default('nspawn_hosts') }}"
+  gather_facts: true
+
+- name: Set nspawn containers group
+  hosts: "{{ container_group | default('all_containers') }}"
+  gather_facts: false
+  tasks:
+    - name: Add hosts to dynamic inventory group
+      group_by:
+        key: nspawn_containers
+        parents: all_nspawn_containers
+      when:
+        - container_tech == 'nspawn'
+  tags:
+    - always
+    - nspawn-containers-create
+
+- name: Create container(s)
+  hosts: all_nspawn_containers
+  gather_facts: false
+  user: root
+  roles:
+    - role: "nspawn_container_create"
+  environment: "{{ deployment_environment_variables | default({}) }}"
+  tags:
+    - nspawn-containers-create
+
+- name: Configure containers default software
+  hosts: all_nspawn_containers
+  gather_facts: true
+  user: root
+  pre_tasks:
+    - include: common-tasks/set-upper-constraints.yml
+    - include: common-tasks/set-pip-upstream-url.yml
+  roles:
+    - role: "openstack_hosts"
+      is_container: true
+  vars_files:
+    - defaults/repo_packages/openstack_services.yml
+  environment: "{{ deployment_environment_variables | default({}) }}"
+  tags:
+    - nspawn-containers-create

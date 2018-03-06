@@ -13,5 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- include: "containers-{{ container_tech | default('lxc') }}-host.yml"
-- include: "containers-{{ container_tech | default('lxc') }}-create.yml"
+- include: "containers-lxc-host.yml"
+- include: "containers-lxc-create.yml"
+- include: "containers-nspawn-host.yml"
+- include: "containers-nspawn-create.yml"

@@ -48,8 +48,12 @@
 - job:
     name: openstack-ansible-deploy_with_ansible_devel-aio-ubuntu-xenial
     parent: openstack-ansible-deploy-aio-ubuntu-xenial
+    branches: ^(devel|master)$
+    required-projects:
+      - name: github.com/ansible/ansible
+        override-checkout: devel
     vars:
-      ansible_package: "git+https://github.com/ansible/ansible@devel"
+      ansible_package: "file://{{ ansible_user_dir }}/src/github.com/ansible/ansible"
 
 # ubuntu
 - job:
@@ -78,6 +82,13 @@
     vars:
       action: upgrade
       scenario: aio
+
+- job:
+    name: openstack-ansible-deploy-aio_nspawn-ubuntu-xenial
+    parent: openstack-ansible-deploy-aio_lxc-ubuntu-xenial
+    voting: false
+    vars:
+      scenario: aio_nspawn
 
 - job:
     name: openstack-ansible-upgrade-ceph-ubuntu-xenial
@@ -109,6 +120,13 @@
     voting: false
 
 - job:
+    name: openstack-ansible-deploy-aio_basekit-centos-7
+    parent: openstack-ansible-deploy-aio_lxc-centos-7
+    vars:
+      action: deploy
+      scenario: aio_basekit
+
+- job:
     name: openstack-ansible-deploy-ceph-centos-7
     parent: openstack-ansible-deploy-aio_lxc-centos-7
     vars:
@@ -122,6 +140,12 @@
     vars:
       action: upgrade
       scenario: aio
+
+- job:
+    name: openstack-ansible-deploy-aio_nspawn-centos-7
+    parent: openstack-ansible-deploy-aio_lxc-centos-7
+    vars:
+      scenario: aio_nspawn
 
 - job:
     name: openstack-ansible-upgrade-ceph-centos-7
@@ -139,6 +163,13 @@
     voting: false
 
 - job:
+    name: openstack-ansible-deploy-aio_basekit-opensuse-423
+    parent: openstack-ansible-deploy-aio_lxc-opensuse-423
+    vars:
+      action: deploy
+      scenario: aio_basekit
+
+- job:
     name: openstack-ansible-deploy-ceph-opensuse-423
     parent: openstack-ansible-deploy-aio_lxc-opensuse-423
     vars:
@@ -152,6 +183,12 @@
     vars:
       action: upgrade
       scenario: aio
+
+- job:
+    name: openstack-ansible-deploy-aio_nspawn-opensuse-423
+    parent: openstack-ansible-deploy-aio_lxc-opensuse-423
+    vars:
+      scenario: aio_nspawn
 
 
 # NOTE(cloudnull): META JOB MAP

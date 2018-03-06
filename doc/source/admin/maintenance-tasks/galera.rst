@@ -1,4 +1,3 @@
-==========================
 Galera cluster maintenance
 ==========================
 
@@ -84,7 +83,9 @@ one of the nodes.
        ## for init
        # /etc/init.d/mysql start --wsrep-new-cluster
        ## for systemd
-       # systemctl start mysql --wsrep-new-cluster
+       # systemctl set-environment _WSREP_NEW_CLUSTER='--wsrep-new-cluster'
+       # systemctl start mysql
+       # systemctl set-environment _WSREP_NEW_CLUSTER=''
 
    Please also have a look at `upstream starting a cluster page <http://galeracluster.com/documentation-webpages/startingcluster.html>`_
 
@@ -142,6 +143,8 @@ one of the nodes.
        wsrep_cluster_size        3
        wsrep_cluster_state_uuid  338b06b0-2948-11e4-9d06-bef42f6c52f1
        wsrep_cluster_status      Primary
+
+.. _galera-cluster-recovery:
 
 Galera cluster recovery
 ~~~~~~~~~~~~~~~~~~~~~~~

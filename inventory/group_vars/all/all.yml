@@ -14,7 +14,7 @@
 # limitations under the License.
 
 ## OpenStack Source Code Release
-openstack_release: 17.0.0
+openstack_release: master
 
 ## Verbosity Options
 debug: False
@@ -23,8 +23,10 @@ debug: False
 ssh_delay: 5
 
 # Set the package install state for distribution packages
-# Options are 'present' and 'latest'
-package_state: "latest"
+# Options are 'present' and 'latest'.
+# NOTE(mhayden): Allowing CentOS 7 to use package_state=present should give
+# gate jobs a better chance to finish and expose more issues to fix.
+package_state: "{{ (ansible_os_family == 'RedHat') | ternary('present', 'latest') }}"
 
 # Set "/var/log" to be a bind mount to the physical host.
 default_bind_mount_logs: true
@@ -66,7 +68,8 @@ service_region: RegionOne
 
 ## OpenStack Domain
 openstack_domain: openstack.local
-lxc_container_domain: "{{ openstack_domain }}"
+lxc_container_domain: "{{ container_domain }}"
+container_domain: "{{ openstack_domain }}"
 
 ## DHCP Domain Name
 dhcp_domain: openstacklocal
